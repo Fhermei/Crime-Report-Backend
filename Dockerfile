@@ -25,11 +25,9 @@ COPY . .
 # Collect static files
 RUN python manage.py collectstatic --no-input
 
-# Run migrations
-RUN python manage.py migrate
-
-# Expose port
+# Expose port (Render uses 10000 by default)
 EXPOSE 10000
 
 # Start the server
+# This is the recommended way for Render
 CMD ["gunicorn", "config.wsgi", "--log-file", "-", "--bind", "0.0.0.0:10000"]
