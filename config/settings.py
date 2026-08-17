@@ -295,8 +295,16 @@ if not DEBUG:
     CSRF_COOKIE_HTTPONLY = True
 
 # ============================================
-# LOGGING CONFIGURATION
+# LOGGING CONFIGURATION (FIXED FOR RENDER)
 # ============================================
+
+# Create logs directory if it doesn't exist
+LOGS_DIR = BASE_DIR / "logs"
+if not os.path.exists(LOGS_DIR):
+    try:
+        os.makedirs(LOGS_DIR)
+    except OSError:
+        pass  # If we can't create, just use console logging
 
 LOGGING = {
     "version": 1,
@@ -315,11 +323,6 @@ LOGGING = {
         "console": {
             "class": "logging.StreamHandler",
             "formatter": "simple",
-        },
-        "file": {
-            "class": "logging.FileHandler",
-            "filename": BASE_DIR / "logs" / "django.log",
-            "formatter": "verbose",
         },
     },
     "root": {
@@ -356,59 +359,12 @@ LOGGING = {
 }
 
 # ============================================
-# EMAIL CONFIGURATION (Optional)
-# ============================================
-
-# For production, configure email settings if needed
-# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-# EMAIL_HOST = config("EMAIL_HOST", default="")
-# EMAIL_PORT = config("EMAIL_PORT", default=587, cast=int)
-# EMAIL_USE_TLS = config("EMAIL_USE_TLS", default=True, cast=bool)
-# EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")
-# EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
-# DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="noreply@crimesystem.com")
-
-# ============================================
 # ADMIN SITE CONFIGURATION
 # ============================================
 
 ADMIN_SITE_HEADER = "Crime Reporting System Admin"
 ADMIN_SITE_TITLE = "Crime Reporting System"
 ADMIN_INDEX_TITLE = "Dashboard"
-
-# ============================================
-# CELERY CONFIGURATION (Optional - for background tasks)
-# ============================================
-
-# CELERY_BROKER_URL = config("REDIS_URL", default="")
-# CELERY_RESULT_BACKEND = config("REDIS_URL", default="")
-# CELERY_ACCEPT_CONTENT = ["application/json"]
-# CELERY_TASK_SERIALIZER = "json"
-# CELERY_RESULT_SERIALIZER = "json"
-# CELERY_TIMEZONE = TIME_ZONE
-
-# ============================================
-# RATE LIMITING (Optional)
-# ============================================
-
-REST_FRAMEWORK.update({
-    "DEFAULT_THROTTLE_RATES": {
-        "anon": "100/day",
-        "user": "1000/day",
-        "login": "5/minute",
-    }
-})
-
-# ============================================
-# API VERSIONING
-# ============================================
-
-REST_FRAMEWORK.update({
-    "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.NamespaceVersioning",
-    "DEFAULT_VERSION": "v1",
-    "ALLOWED_VERSIONS": ["v1", "v2"],
-    "VERSION_PARAM": "version",
-})
 
 # ============================================
 # CUSTOM SETTINGS
@@ -435,16 +391,3 @@ TRACKING_CODE_PREFIX = "CR"
 # Emergency contact
 EMERGENCY_PHONE = config("EMERGENCY_PHONE", default="+234 800 123 4567")
 EMERGENCY_EMAIL = config("EMERGENCY_EMAIL", default="emergency@crimesystem.com")
-
-# ============================================
-# DEBUG TOOLBAR (Development only)
-# ============================================
-
-if DEBUG:
-    try:
-        import debug_toolbar
-        INSTALLED_APPS.append("debug_toolbar")
-        MIDDLEWARE.append("debug_toolbar.middleware.DebugToolbarMiddleware")
-        INTERNAL_IPS = ["127.0.0.1"]
-    except ImportError:
-        pass
