@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -o errexit
 
+# Install Python 3.12 if needed (Render will use runtime.txt)
+echo "Using Python version from runtime.txt..."
+
 # Upgrade pip
 pip install --upgrade pip
 
