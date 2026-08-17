@@ -1,8 +1,14 @@
 #!/usr/bin/env bash
 set -o errexit
 
-# Install Python 3.12 if needed (Render will use runtime.txt)
-echo "Using Python version from runtime.txt..."
+# Install Python 3.12 manually
+echo "Installing Python 3.12..."
+apt-get update
+apt-get install -y python3.12 python3.12-venv python3.12-dev
+
+# Create a virtual environment with Python 3.12
+python3.12 -m venv venv
+source venv/bin/activate
 
 # Upgrade pip
 pip install --upgrade pip
