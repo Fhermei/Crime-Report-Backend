@@ -19,7 +19,8 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config("SECRET_KEY")
+# Use dummy key for build if not found
+SECRET_KEY = config("SECRET_KEY", default="dummy-secret-key-for-build")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", default=False, cast=bool)
@@ -295,7 +296,7 @@ if not DEBUG:
     CSRF_COOKIE_HTTPONLY = True
 
 # ============================================
-# LOGGING CONFIGURATION (FIXED FOR RENDER)
+# LOGGING CONFIGURATION
 # ============================================
 
 # Create logs directory if it doesn't exist
