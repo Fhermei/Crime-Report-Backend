@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -o errexit
 
-# This script is a placeholder for Render's Python environment.
-# The Dockerfile is now responsible for the build process.
-echo "Docker build in progress..."
+echo "Starting build process..."
+pip install -r requirements.txt
+python manage.py collectstatic --no-input
+python manage.py migrate
+echo "Build completed!"
