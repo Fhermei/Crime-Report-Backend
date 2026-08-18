@@ -1,15 +1,16 @@
 """
 Complete test data loader for Crime Reporting System
-Run: python manage.py shell < load_test_data.py
+Run: python test.py
 """
 
 import os
+import sys
 import django
 import random
-import uuid
-from datetime import datetime, timedelta
+from datetime import timedelta
 from django.utils import timezone
 
+# Setup Django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 django.setup()
 
@@ -61,25 +62,26 @@ LOCATIONS = [
 ]
 
 # ============================================================
-# HELPER FUNCTIONS
+# MAIN FUNCTION
 # ============================================================
 
-def set_password(user, password):
-    """Set password for a user"""
-    user.set_password(password)
-    user.save()
-
-def create_users():
-    """Create all test users"""
+def main():
     print("\n" + "=" * 60)
-    print("📝 CREATING USERS")
+    print("🚀 LOADING TEST DATA")
     print("=" * 60)
 
-    # Get or create admin
+    # ============================================================
+    # CREATE USERS (11 Users: 1 Admin + 3 Police + 7 Citizens)
+    # ============================================================
+
+    print("\n📝 CREATING USERS")
+    print("-" * 40)
+
+    # Admin
     admin, created = User.objects.get_or_create(
         username='admin',
         defaults={
-            'email': 'admin@gmail.com',
+            'email': 'admin@crimesystem.com',
             'phone_number': '08012345678',
             'role': 'admin',
             'first_name': 'System',
@@ -89,14 +91,15 @@ def create_users():
         }
     )
     if created:
-        set_password(admin, 'admin123')
-        print(f"  ✅ Created admin: admin@gmail.com / admin123")
+        admin.set_password('Admin@123')
+        admin.save()
+        print("  ✅ Created admin: admin@crimesystem.com / Admin@123")
     else:
-        print(f"  ℹ️ Admin already exists")
-        # Update password just in case
-        set_password(admin, 'admin123')
+        admin.set_password('Admin@123')
+        admin.save()
+        print("  ℹ️ Admin already exists - password reset")
 
-    # Create police officers
+    # Police officers (3)
     police_data = [
         {"username": "police_john", "email": "john.smith@police.com", "phone": "08023456789", 
          "first": "John", "last": "Smith", "badge": "P1001"},
@@ -104,10 +107,6 @@ def create_users():
          "first": "Mary", "last": "Johnson", "badge": "P1002"},
         {"username": "police_peter", "email": "peter.williams@police.com", "phone": "08045678901", 
          "first": "Peter", "last": "Williams", "badge": "P1003"},
-        {"username": "police_grace", "email": "grace.brown@police.com", "phone": "08056789012", 
-         "first": "Grace", "last": "Brown", "badge": "P1004"},
-        {"username": "police_michael", "email": "michael.davis@police.com", "phone": "08067890123", 
-         "first": "Michael", "last": "Davis", "badge": "P1005"},
     ]
 
     police_users = []
@@ -125,13 +124,16 @@ def create_users():
             }
         )
         if created:
-            set_password(user, 'Police@123')
+            user.set_password('Police@123')
+            user.save()
             print(f"  ✅ Created police: {data['email']} / Police@123")
         else:
+            user.set_password('Police@123')
+            user.save()
             print(f"  ℹ️ Police {data['first']} already exists")
         police_users.append(user)
 
-    # Create citizens
+    # Citizens (7)
     citizen_data = [
         {"username": "citizen_alice", "email": "alice.wonder@email.com", "phone": "08078901234", 
          "first": "Alice", "last": "Wonder"},
@@ -147,22 +149,6 @@ def create_users():
          "first": "Frank", "last": "Ocean"},
         {"username": "citizen_grace", "email": "grace.hopper@email.com", "phone": "08134567890", 
          "first": "Grace", "last": "Hopper"},
-        {"username": "citizen_henry", "email": "henry.ford@email.com", "phone": "08145678901", 
-         "first": "Henry", "last": "Ford"},
-        {"username": "citizen_ivy", "email": "ivy.league@email.com", "phone": "08156789012", 
-         "first": "Ivy", "last": "League"},
-        {"username": "citizen_jack", "email": "jack.sparrow@email.com", "phone": "08167890123", 
-         "first": "Jack", "last": "Sparrow"},
-        {"username": "citizen_kate", "email": "kate.middleton@email.com", "phone": "08178901234", 
-         "first": "Kate", "last": "Middleton"},
-        {"username": "citizen_leo", "email": "leo.dicaprio@email.com", "phone": "08189012345", 
-         "first": "Leo", "last": "DiCaprio"},
-        {"username": "citizen_mia", "email": "mia.khalifa@email.com", "phone": "08190123456", 
-         "first": "Mia", "last": "Khalifa"},
-        {"username": "citizen_noah", "email": "noah.century@email.com", "phone": "08201234567", 
-         "first": "Noah", "last": "Century"},
-        {"username": "citizen_olivia", "email": "olivia.benson@email.com", "phone": "08212345678", 
-         "first": "Olivia", "last": "Benson"},
     ]
 
     citizen_users = []
@@ -178,36 +164,31 @@ def create_users():
             }
         )
         if created:
-            set_password(user, 'Citizen@123')
+            user.set_password('Citizen@123')
+            user.save()
             print(f"  ✅ Created citizen: {data['email']} / Citizen@123")
         else:
+            user.set_password('Citizen@123')
+            user.save()
             print(f"  ℹ️ Citizen {data['first']} already exists")
         citizen_users.append(user)
 
     print(f"\n📊 Total users: {User.objects.count()}")
-    print(f"   Admin: {User.objects.filter(role='admin').count()}")
-    print(f"   Police: {User.objects.filter(role='police').count()}")
-    print(f"   Citizens: {User.objects.filter(role='citizen').count()}")
 
-    return {
-        "admin": admin,
-        "police": police_users,
-        "citizens": citizen_users,
-    }
+    # ============================================================
+    # CREATE REPORTS (50 Reports)
+    # ============================================================
 
-def create_reports(users_data):
-    """Create 50 crime reports"""
-    print("\n" + "=" * 60)
-    print("📝 CREATING CRIME REPORTS")
-    print("=" * 60)
+    print("\n📝 CREATING 50 CRIME REPORTS")
+    print("-" * 40)
 
-    police = users_data["police"]
-    citizens = users_data["citizens"]
+    # Clear existing reports (optional - uncomment if you want fresh data)
+    # CrimeReport.objects.all().delete()
+
     reports_created = []
-
     for i in range(50):
         is_anonymous = random.choice([True, False])
-        reporter = None if is_anonymous else random.choice(citizens)
+        reporter = None if is_anonymous else random.choice(citizen_users)
         
         location = random.choice(LOCATIONS)
         days_ago = random.randint(0, 30)
@@ -217,8 +198,8 @@ def create_reports(users_data):
             minutes=random.randint(0, 59)
         )
         
-        # Weighted status distribution
-        status_options = ["pending"] * 20 + ["investigating"] * 15 + ["resolved"] * 15
+        # Weighted status: more pending (17), investigating (17), resolved (16)
+        status_options = ["pending"] * 17 + ["investigating"] * 17 + ["resolved"] * 16
         status = random.choice(status_options)
         
         report = CrimeReport.objects.create(
@@ -243,10 +224,10 @@ def create_reports(users_data):
             # Pending -> Investigating
             StatusUpdate.objects.create(
                 report=report,
-                updated_by=random.choice(police),
+                updated_by=random.choice(police_users),
                 old_status="pending",
                 new_status="investigating",
-                note=f"Investigation started by {random.choice(police).first_name}.",
+                note=f"Investigation started by {random.choice(police_users).first_name}.",
                 timestamp=report.created_at + timedelta(hours=random.randint(1, 12)),
             )
 
@@ -254,7 +235,7 @@ def create_reports(users_data):
             # Investigating -> Resolved
             StatusUpdate.objects.create(
                 report=report,
-                updated_by=random.choice(police),
+                updated_by=random.choice(police_users),
                 old_status="investigating",
                 new_status="resolved",
                 note=random.choice([
@@ -285,13 +266,12 @@ def create_reports(users_data):
     print(f"   Investigating: {CrimeReport.objects.filter(status='investigating').count()}")
     print(f"   Resolved: {CrimeReport.objects.filter(status='resolved').count()}")
 
-    return reports_created
+    # ============================================================
+    # CREATE EVIDENCE
+    # ============================================================
 
-def create_evidence(reports):
-    """Create evidence for some reports"""
-    print("\n" + "=" * 60)
-    print("📝 CREATING EVIDENCE")
-    print("=" * 60)
+    print("\n📝 CREATING EVIDENCE")
+    print("-" * 40)
 
     evidence_urls = [
         "https://images.unsplash.com/photo-1582139329536-e7284fece509?w=300",
@@ -299,11 +279,11 @@ def create_evidence(reports):
         "https://images.unsplash.com/photo-1518770660439-4636190af475?w=300",
         "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=300",
     ]
-    
+
     evidence_types = ["image", "video", "audio", "document"]
     evidence_created = 0
 
-    for report in random.sample(reports, min(30, len(reports))):
+    for report in random.sample(reports_created, min(30, len(reports_created))):
         num_evidence = random.randint(1, 3)
         for _ in range(num_evidence):
             Evidence.objects.create(
@@ -316,52 +296,36 @@ def create_evidence(reports):
 
     print(f"  ✅ Created {evidence_created} evidence entries")
 
-def print_summary():
-    """Print final summary"""
+    # ============================================================
+    # SUMMARY
+    # ============================================================
+
     print("\n" + "=" * 60)
     print("✅ TEST DATA LOADING COMPLETE!")
     print("=" * 60)
-    
+
     print("\n📊 DATABASE SUMMARY:")
     print(f"  👤 Users: {User.objects.count()}")
     print(f"     Admin: {User.objects.filter(role='admin').count()}")
     print(f"     Police: {User.objects.filter(role='police').count()}")
     print(f"     Citizens: {User.objects.filter(role='citizen').count()}")
-    
+
     print(f"\n  📋 Crime Reports: {CrimeReport.objects.count()}")
     print(f"     Pending: {CrimeReport.objects.filter(status='pending').count()}")
     print(f"     Investigating: {CrimeReport.objects.filter(status='investigating').count()}")
     print(f"     Resolved: {CrimeReport.objects.filter(status='resolved').count()}")
-    
+
     print(f"\n  📎 Status Updates: {StatusUpdate.objects.count()}")
     print(f"  🖼️ Evidence Files: {Evidence.objects.count()}")
     print(f"  🔔 Notifications: {Notification.objects.count()}")
 
     print("\n🔑 LOGIN CREDENTIALS:")
-    print("  👑 Admin: admin@gmail.com / admin123")
+    print("  👑 Admin: admin@crimesystem.com / Admin@123")
     print("  👮 Police: john.smith@police.com / Police@123")
     print("  👤 Citizen: alice.wonder@email.com / Citizen@123")
 
     print("\n💡 TIP: Use email address to login, not username!")
     print("=" * 60)
-
-def main():
-    """Main execution function"""
-    print("=" * 60)
-    print("🚀 STARTING TEST DATA LOADING")
-    print("=" * 60)
-
-    # Create users
-    users_data = create_users()
-
-    # Create reports
-    reports = create_reports(users_data)
-
-    # Create evidence
-    create_evidence(reports)
-
-    # Print summary
-    print_summary()
 
 if __name__ == "__main__":
     main()
